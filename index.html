@@ -113,7 +113,6 @@
       }
     }
 
-    /* Sidebar Styles */
     .sidebar {
       width: 280px;
       flex-shrink: 0;
@@ -238,7 +237,6 @@
       background: rgba(255, 107, 107, 0.1);
     }
 
-    /* Main Content Styles */
     .main-content {
       flex: 1;
       min-width: 0;
@@ -359,7 +357,6 @@
       border-radius: 4px;
     }
 
-    /* Message Styles */
     .message {
       margin-bottom: 1rem;
       padding: 2rem 1rem 0.75rem 1rem;
@@ -424,7 +421,6 @@
       opacity: 1;
     }
 
-    /* Brain think button — always visible (overrides the fade) */
     .think-wrapper {
       position: relative;
       display: inline-flex;
@@ -444,14 +440,12 @@
       transition: all 0.2s ease;
       font-size: 0.75rem;
       color: #d4a8ff;
-      opacity: 1 !important; /* always show, even when parent fades */
+      opacity: 1 !important;
     }
 
-    /* Keep brain always visible even when message-actions is faded */
     .message-actions .think-wrapper {
       opacity: 1;
     }
-    /* But still fade on non-hovered message by proxying through a class */
     .message:not(:hover) .message-actions {
       opacity: 0;
     }
@@ -556,7 +550,6 @@
       border-color: rgba(255, 107, 107, 0.3);
     }
 
-    /* Input Area */
     .input-group {
       display: flex;
       flex-direction: column;
@@ -698,7 +691,6 @@
       .message { max-width: 90%; }
     }
 
-    /* ── Toast notifications ─────────────────────────────────────────────── */
     #toast-container {
       position: fixed;
       bottom: 1.5rem;
@@ -752,7 +744,6 @@
     }
     .toast.leaving { animation: toastOut 0.25s ease forwards; pointer-events: none; }
 
-    /* ── Confirm / alert modal ───────────────────────────────────────────── */
     #modal-backdrop {
       display: none;
       position: fixed;
@@ -812,14 +803,81 @@
       color: #ffffff;
     }
     .modal-btn.confirm-ok:hover { box-shadow: 0 4px 16px rgba(255,0,110,0.35); }
+
+    .info-section {
+      background: var(--gradient-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      margin-top: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .info-section h2 {
+      color: #ffffff;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+
+    .info-section h3 {
+      color: #ffffff;
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .info-section p {
+      color: rgba(255, 255, 255, 0.85);
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+
+    .info-section ul {
+      color: rgba(255, 255, 255, 0.85);
+      line-height: 1.7;
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .info-section li {
+      margin-bottom: 0.5rem;
+    }
+
+    .footer {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--glass-border);
+      text-align: center;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+    }
+
+    .footer p {
+      margin-bottom: 0.5rem;
+    }
+
+    .footer a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer a:hover {
+      color: var(--secondary);
+    }
+
+    .heart-icon {
+      color: #ff006e;
+    }
   </style>
 </head>
 <body>
 
-<!-- Toast container -->
 <div id="toast-container"></div>
 
-<!-- Confirm/alert modal -->
 <div id="modal-backdrop">
   <div class="modal">
     <div class="modal-icon" id="modal-icon">⚠️</div>
@@ -833,7 +891,7 @@
   <div class="header">
     <img src="https://cdn.cgamz.online/apollyon-trans.png" alt="Apollyon Logo" class="logo">
     <h1>Apollyon</h1>
-    <p class="subtitle">AI-powered conversations in your browser</p>
+    <p class="subtitle">AI-powered conversations under your control.</p>
   </div>
 
   <div class="chat-layout">
@@ -875,18 +933,42 @@
       <textarea id="prompt" placeholder="Loading model... please wait" rows="3" disabled></textarea>
       <button id="send"><i class="fas fa-paper-plane"></i> Send Message</button>
     </div>
+
+    <div class="info-section">
+      <h2>About Apollyon</h2>
+      <p>Apollyon is a cutting-edge AI assistant that runs entirely in your browser. Your conversations stay private and secure on your device, with no data ever being sent to external servers.</p>
+
+      <h3>Key Features</h3>
+      <ul>
+        <li>Complete privacy - all processing happens locally in your browser</li>
+        <li>No internet connection required after initial model download</li>
+        <li>You running the model means no ratelimiting whatsoever.</li>
+        <li>Fast and responsive interactions with streaming responses</li>
+        <li>Multiple chat management with automatic AI-generated titles</li>
+        <li>Export your conversations for future reference</li>
+      </ul>
+
+      <h3>Getting Started</h3>
+      <p>Simply wait for the model to load, then start typing your questions or requests. The AI will respond in real-time as it generates its answer. You can create new chats, switch between conversations, and export your chat history at any time.</p>
+
+      <h3>Technical Details</h3>
+      <p>Powered by the Llama 3.2 1B Instruct model, optimized for browser-based inference. The model is quantized to run efficiently on consumer hardware while maintaining high-quality responses across a wide range of tasks including coding, writing, analysis, and creative work.</p>
+    </div>
+
+    <div class="footer">
+      <p>Created with <i class="fas fa-heart heart-icon"></i> by Crafted</p>
+      <p>Copyright 2026 Crafted Gamz ARR | <a href="https://apollyon.pages.dev" target="_blank">apollyon.pages.dev</a></p>
+    </div>
   </div>
   </div>
 </div>
 
 <script type="module">
-  // ── State ──────────────────────────────────────────────────────────────────
   let chats = JSON.parse(localStorage.getItem('apollyon-chats') || '{}');
   let currentChatId = null;
   let engine = null;
   let isGenerating = false;
 
-  // ── DOM refs ───────────────────────────────────────────────────────────────
   const chatEl       = document.getElementById('chat');
   const promptEl     = document.getElementById('prompt');
   const sendBtn      = document.getElementById('send');
@@ -898,7 +980,6 @@
   const clearBtn     = document.getElementById('clear-btn');
   const exportBtn    = document.getElementById('export-btn');
 
-  // ── Toast & Modal ──────────────────────────────────────────────────────────
   const toastContainer = document.getElementById('toast-container');
   const modalBackdrop  = document.getElementById('modal-backdrop');
   const modalIcon      = document.getElementById('modal-icon');
@@ -963,7 +1044,6 @@
     if (e.target === modalBackdrop) modalBackdrop.classList.remove('open');
   });
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
   function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
   function saveChats() {
@@ -997,7 +1077,6 @@
   }
 
   function formatContent(text) {
-    // Basic markdown-ish rendering
     return text
       .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
       .replace(/`([^`]+)`/g, '<code>$1</code>')
@@ -1038,11 +1117,9 @@
 
   function syncMessagesFromDom() {
     if (!currentChatId) return;
-    // Re-sync after deletions (simplified: just save current chat state)
     saveChats();
   }
 
-  // ── Chat management ────────────────────────────────────────────────────────
   function newChat() {
     const id = genId();
     chats[id] = { title: 'New Chat', messages: [], createdAt: Date.now(), updatedAt: Date.now() };
@@ -1096,7 +1173,6 @@
     toast('Chat exported!', 'success');
   }
 
-  // ── Model & system prompt ─────────────────────────────────────────────────
   const MODEL_ID = 'Llama-3.2-1B-Instruct-q4f32_1-MLC';
   const MODEL_DISPLAY = 'Llama 3.2 1B Instruct';
 
@@ -1153,7 +1229,6 @@ Formatting:
     }
   }
 
-  // ── Send message ───────────────────────────────────────────────────────────
   async function sendMessage() {
     if (!engine || isGenerating) return;
     const text = promptEl.value.trim();
@@ -1165,7 +1240,6 @@ Formatting:
     isGenerating = true;
     sendBtn.disabled = true;
 
-    // Save & display user message
     const isFirstMessage = chats[currentChatId].messages.length === 0;
     chats[currentChatId].messages.push({ role: 'user', content: text });
     chats[currentChatId].updatedAt = Date.now();
@@ -1173,7 +1247,6 @@ Formatting:
     saveChats();
     renderChatList();
 
-    // Streaming assistant reply
     const assistantDiv = appendMessage('assistant', '|');
     const contentEl = assistantDiv.querySelector('.message-content');
     let fullReply = '';
@@ -1197,7 +1270,6 @@ Formatting:
       }
       contentEl.innerHTML = formatContent(fullReply);
 
-      // Update brain button with actual thinking content once stream ends
       const thinkWrapper = assistantDiv.querySelector('.think-wrapper');
       if (thinkWrapper) {
         const thinkTooltip = thinkWrapper.querySelector('.think-tooltip');
@@ -1217,7 +1289,6 @@ Formatting:
     chats[currentChatId].updatedAt = Date.now();
     saveChats();
 
-    // Generate AI title on first exchange
     if (isFirstMessage) generateTitle(currentChatId, text);
 
     isGenerating = false;
@@ -1225,7 +1296,6 @@ Formatting:
     chatEl.scrollTop = chatEl.scrollHeight;
   }
 
-  // ── AI chat title generation ───────────────────────────────────────────────
   async function generateTitle(chatId, userMsg) {
     try {
       const result = await engine.chat.completions.create({
@@ -1245,11 +1315,9 @@ Generate a short title for this conversation.` }
         renderChatList();
       }
     } catch (e) {
-      // silently fall back — title stays as-is
     }
   }
 
-  // ── Event listeners ────────────────────────────────────────────────────────
   sendBtn.addEventListener('click', sendMessage);
   promptEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
@@ -1258,11 +1326,9 @@ Generate a short title for this conversation.` }
   clearBtn.addEventListener('click', clearCurrentChat);
   exportBtn.addEventListener('click', exportCurrentChat);
 
-  // ── Init ───────────────────────────────────────────────────────────────────
   sendBtn.disabled = true;
   promptEl.disabled = true;
 
-  // Load existing chats or start fresh
   const existingIds = Object.keys(chats);
   if (existingIds.length) {
     loadChat(existingIds.sort((a, b) => (chats[b].updatedAt || 0) - (chats[a].updatedAt || 0))[0]);
