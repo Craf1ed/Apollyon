@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WebLLM Chat</title>
-  <script src="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.84/lib/index.js"></script>
+  <title>Apollyon</title>
+  <link rel="icon" href="https://cdn.cgamz.online/apollyon-solid.png">
   <style>
     * {
       margin: 0;
@@ -63,6 +63,15 @@
     .header {
       text-align: center;
       margin-bottom: 1rem;
+    }
+
+    .logo {
+      width: 120px;
+      height: 120px;
+      border-radius: 20px;
+      margin-bottom: 1rem;
+      box-shadow: 0 8px 32px rgba(255, 0, 110, 0.2);
+      animation: float 3s ease-in-out infinite;
     }
 
     h1 {
@@ -259,6 +268,11 @@
       to { transform: rotate(360deg); }
     }
 
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
     @media (max-width: 768px) {
       body {
         padding: 1rem;
@@ -283,7 +297,8 @@
 
 <div class="container">
   <div class="header">
-    <h1>WebLLM Chat</h1>
+    <img src="https://cdn.cgamz.online/apollyon-trans.png" alt="Apollyon Logo" class="logo">
+    <h1>Apollyon</h1>
     <p class="subtitle">AI-powered conversations in your browser</p>
   </div>
 
@@ -308,7 +323,9 @@
   </div>
 </div>
 
-<script>
+<script type="module">
+import * as webllm from "https://esm.run/@mlc-ai/web-llm";
+
 const chat = document.getElementById("chat");
 const prompt = document.getElementById("prompt");
 const send = document.getElementById("send");
