@@ -942,6 +942,7 @@
       <ul>
         <li>Complete privacy - all processing happens locally in your browser</li>
         <li>No internet connection required after initial model download</li>
+        <li>Runs on the CPU via WebAssembly - no WebGPU or dedicated graphics card needed, so it works on far more browsers and devices</li>
         <li>You running the model means no ratelimiting whatsoever.</li>
         <li>Fast and responsive interactions with streaming responses</li>
         <li>Multiple chat management with automatic AI-generated titles</li>
@@ -952,7 +953,7 @@
       <p>Simply wait for the model to load, then start typing your questions or requests. The AI will respond in real-time as it generates its answer. You can create new chats, switch between conversations, and export your chat history at any time.</p>
 
       <h3>Technical Details</h3>
-      <p>Powered by the Llama 3.2 1B Instruct model, optimized for browser-based inference. The model is quantized to run efficiently on consumer hardware while maintaining high-quality responses across a wide range of tasks including coding, writing, analysis, and creative work.</p>
+      <p>Powered by the Llama 3.2 1B Instruct model in GGUF format, run through wllama, a WebAssembly binding for llama.cpp. Inference happens entirely on the CPU, so no WebGPU support is required - this trades some raw speed for compatibility with essentially any modern browser, including ones without GPU acceleration. Response speed depends on your device's CPU; more cores generally means faster generation.</p>
     </div>
   </div>
   </div>
@@ -1173,48 +1174,42 @@
     toast('Chat exported!', 'success');
   }
 
-  const MODEL_ID = 'Llama-3.2-1B-Instruct-q4f32_1-MLC';
+  const MODEL_REPO = 'bartowski/Llama-3.2-1B-Instruct-GGUF';
+  const MODEL_FILE = 'Llama-3.2-1B-Instruct-Q4_K_M.gguf';
   const MODEL_DISPLAY = 'Llama 3.2 1B Instruct';
+  const WLLAMA_VERSION = '3.4.1';
+  const WLLAMA_CDN_BASE = `https://cdn.jsdelivr.net/npm/@wllama/wllama@${WLLAMA_VERSION}`;
 
-  const SYSTEM_PROMPT = `You are Apollyon, a highly capable, direct, and thoughtful AI assistant running entirely in the user's browser using the ${MODEL_DISPLAY} language model via WebLLM - no data ever leaves their device.
-
-Personality & tone:
-- Be direct and confident. Get to the point without unnecessary filler or excessive hedging.
-- Be genuinely helpful. If asked to do something, do it well rather than talking around it.
-- Use a natural, conversational tone - not overly formal, not sloppy. Match the user's register.
-- Be honest about uncertainty. If you don't know something or your knowledge is limited, say so plainly.
-- You can be witty, but don't force it. Substance over style.
-
-Capabilities:
-- Answer questions across a broad range of topics: coding, writing, analysis, math, reasoning, creative tasks, research, and general knowledge.
-- Write, review, debug, and explain code in any language.
-- Help draft, edit, summarize, or rewrite text.
-- Break down complex topics clearly and concisely.
-- Think through problems step by step when it helps.
-
-Constraints you should be transparent about:
-- Your knowledge has a training cutoff and you cannot access the internet or real-time data.
-- You are running as a quantized 1B-parameter model (${MODEL_DISPLAY}) locally in the browser. You are capable but acknowledge when a task may exceed your context window or reasoning depth.
-- You cannot execute code, access files, or interact with external systems.
-
-Formatting:
-- Use markdown naturally - headers, bullet points, bold, and code blocks where they genuinely aid clarity.
-- Don't pad responses with unnecessary repetition or sign-offs like "Certainly!" or "Of course!".
-- For code, always use fenced code blocks with the language specified.
-- Keep responses as long as they need to be and no longer.
-- Do not use em dashes (—) in your responses. Use regular hyphens (-) or rephrase instead.`;
 
   async function loadModel() {
     try {
-      const { CreateMLCEngine } = await import('https://esm.run/@mlc-ai/web-llm');
+      const { Wllama, LoggerWithoutDebug } = await import(`${WLLAMA_CDN_BASE}/esm/index.js`);
 
-      engine = await CreateMLCEngine(MODEL_ID, {
-        initProgressCallback: (p) => {
-          const pct = Math.round((p.progress || 0) * 100);
-          progressFill.style.width = pct + '%';
-          progressText.textContent = p.text || `Loading… ${pct}%`;
+      engine = new Wllama(
+        {
+          default: `${WLLAMA_CDN_BASE}/esm/wasm/wllama.wasm`,
+        },
+        {
+          logger: LoggerWithoutDebug,
+          suppressNativeLog: true,
         }
-      });
+      );
+
+      await engine.loadModelFromHF(
+        { repo: MODEL_REPO, file: MODEL_FILE },
+        {
+          n_gpu_layers: 0, // force pure WebAssembly/CPU inference - WebGPU is never touched
+          n_ctx: 4096,
+          progressCallback: ({ loaded, total }) => {
+            const pct = total ? Math.round((loaded / total) * 100) : 0;
+            const mb = (n) => (n / (1024 * 1024)).toFixed(0);
+            progressFill.style.width = pct + '%';
+            progressText.textContent = total
+              ? `Downloading model… ${pct}% (${mb(loaded)}MB / ${mb(total)}MB)`
+              : `Downloading model… ${mb(loaded)}MB`;
+          },
+        }
+      );
 
       statusEl.innerHTML = `<i class="fas fa-check-circle" style="color:#4ade80"></i> Apollyon Ready`;
       sendBtn.disabled = false;
@@ -1253,16 +1248,24 @@ Formatting:
     let fullThinking = '';
 
     try {
-      const stream = await engine.chat.completions.create({
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          ...chats[currentChatId].messages.map(m => ({ role: m.role, content: m.content }))
-        ],
-        stream: true,
-      });
+      console.log("Engine:", engine);
+console.log("Generating...");
+      const result = await engine.createChatCompletion({
+    messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        ...chats[currentChatId].messages.map(m => ({
+            role: m.role,
+            content: m.content
+        }))
+    ],
+    stream: false,
+    max_tokens: 128
+});
+
+console.log(result);
 
       for await (const chunk of stream) {
-        const delta = chunk.choices[0]?.delta;
+        const delta = chunk.choices?.[0]?.delta;
         fullReply += delta?.content || '';
         fullThinking += delta?.reasoning_content || '';
         contentEl.innerHTML = formatContent(fullReply) + '|';
@@ -1289,7 +1292,7 @@ Formatting:
     chats[currentChatId].updatedAt = Date.now();
     saveChats();
 
-    if (isFirstMessage) generateTitle(currentChatId, text);
+    if (isFirstMessage) await generateTitle(currentChatId, text);
 
     isGenerating = false;
     sendBtn.disabled = false;
@@ -1298,7 +1301,7 @@ Formatting:
 
   async function generateTitle(chatId, userMsg) {
     try {
-      const result = await engine.chat.completions.create({
+      const result = await engine.createChatCompletion({
         messages: [
           { role: 'system', content: 'You generate extremely short chat titles. Respond with ONLY the title — 2 to 4 words maximum, no punctuation, no quotes, no explanation. Keep it very brief.' },
           { role: 'user', content: `User said: "${userMsg.slice(0, 200)}"
@@ -1308,7 +1311,7 @@ Generate a short title for this conversation.` }
         max_tokens: 16,
         stream: false,
       });
-      const title = result.choices[0]?.message?.content?.trim().replace(/^["']|["']$/g, '') || 'New Chat';
+      const title = result.choices?.[0]?.message?.content?.trim().replace(/^["']|["']$/g, '') || 'New Chat';
       if (chats[chatId]) {
         chats[chatId].title = title;
         saveChats();
