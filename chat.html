@@ -1180,6 +1180,8 @@
   const WLLAMA_VERSION = '3.4.1';
   const WLLAMA_CDN_BASE = `https://cdn.jsdelivr.net/npm/@wllama/wllama@${WLLAMA_VERSION}`;
 
+  const SYSTEM_PROMPT = 'You are Apollyon, a helpful AI assistant that runs entirely in the user\'s browser. Be concise, accurate and friendly. Use plain text with light Markdown formatting when it helps readability.';
+
 
   async function loadModel() {
     try {
@@ -1258,13 +1260,13 @@ console.log("Generating...");
             content: m.content
         }))
     ],
-    stream: false,
-    max_tokens: 128
+    stream: true,
+    max_tokens: 512
 });
 
 console.log(result);
 
-      for await (const chunk of stream) {
+      for await (const chunk of result) {
         const delta = chunk.choices?.[0]?.delta;
         fullReply += delta?.content || '';
         fullThinking += delta?.reasoning_content || '';
